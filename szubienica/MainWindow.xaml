@@ -8,16 +8,26 @@
         Loaded="Window_Loaded"
         KeyDown="Window_KeyDown"
         KeyUp="Window_KeyUp"
+        FontSize="24"
+        FontFamily="Arial"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="5"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBlock Text="Category: " FontSize="30" FontWeight="Black" x:Name="categoryTextBlock" Typography.Capitals="AllPetiteCaps"/>
-        <Image Grid.Row="1" Source="images/image0.png" x:Name="gallowsImage"/>
-        <UniformGrid Grid.Row="2" Columns="20" Rows="5" x:Name="windowsSpaceUniformGrid">
+        <TextBlock Text="Category: " FontSize="30" FontWeight="Bold" x:Name="categoryTextBlock" Margin="5"/>
+        <TextBlock Grid.Column="2" Text="Points: " FontSize="30" FontWeight="Bold" x:Name="pointsTextBlock" Margin="5"/>
+        <Image Grid.ColumnSpan="3" Grid.Row="1" Source="images/image0.png" x:Name="gallowsImage"/>
+        <Border Grid.ColumnSpan="3" Grid.Row="2" BorderThickness="5" BorderBrush="#41413e"/>
+        <UniformGrid Grid.ColumnSpan="3" Grid.Row="3" Columns="20" Rows="5" x:Name="windowsSpaceUniformGrid">
         </UniformGrid>
     </Grid>
 </Window>

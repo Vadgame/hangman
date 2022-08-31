@@ -21,98 +21,125 @@ namespace szubienica
     /// </summary>
     public partial class MainWindow : Window
     {
+        // Default entry and category
         private string[] splittedEntry = {"default", "entry"};
         private string category = "Default Category";
-        private int[] wordsStartIndex;
+
+        // UniformGird size
         private byte columns = 20;
         private byte rows = 5;
-        private string alphabet = "abcdefghijklmnoprstuwxyz";
-        private bool isRightAltClicked = false;
+
+        // Indexes of windows in which word of entry start
+        private int[] wordsStartIndex;
+        
         private string imageSource = "images/image";
         private byte mistakes = 0;
+        private int points = 0;
 
+        // If true alt is clicked else is not
+        private bool isRightAltClicked = false;
+
+        // Letter used in keydown
+        private string alphabet = "abcdefghijklmnoprstuwxyz";
         private string specialLettersLatin = "acelnoszx";
         private string specialLettersPolish = "ąćęłńóśżź";
+
+        // Windows background colors
+        private string darkGray = "#85857e";
+        private string lightGray = "#cfcfc4";
 
         public MainWindow()
         {
             InitializeComponent();
+            // Load category and data from .json file
+            LoadData();
+            categoryTextBlock.Text = "Category: " + category;
+            pointsTextBlock.Text = "Points: " + points;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            LoadData();
-            categoryTextBlock.Text = "Category: " + category;
+            CreateUniformGrid();
+        }
 
-            int wordsLength = splittedEntry.Length;
-            wordsStartIndex = new int[wordsLength];
-            int firstLine = StartLine(wordsLength);
-            int lastLine = firstLine + wordsLength - 1;
-
-            int line = 1;
-            int actualWord = -1;
+        private void CreateUniformGrid()
+        {
+            int wordsAmount = splittedEntry.Length;
+            wordsStartIndex = new int[wordsAmount];
+            int firstLine = StartLine(wordsAmount);
             int freeSpaceBeforeWordLength;
-            int modulo;
-            if (firstLine == line) actualWord++;
-            for (int i = 1; i < rows * columns + 1; i++)
+            int actualWord = -1;
+            bool finish = false;
+            for (int r = 0; r < rows; r++)
             {
-                TextBlock window = new TextBlock();
-                window.Margin = new Thickness(2);
-                window.Name = "window" + i;
-
-                modulo = i % columns;
-
-                if (line == firstLine)
+                if (r + 1 == firstLine && !finish)
                 {
+                    actualWord++;
+                    firstLine++;
                     freeSpaceBeforeWordLength = (columns - splittedEntry[actualWord].Length) / 2;
-                    if (modulo == 1) wordsStartIndex[actualWord] = i + freeSpaceBeforeWordLength;
-                    if ((freeSpaceBeforeWordLength < modulo && modulo <= splittedEntry[actualWord].Length + freeSpaceBeforeWordLength) || splittedEntry[actualWord].Length == columns)
+                    wordsStartIndex[actualWord] = r * 20 + freeSpaceBeforeWordLength + 1;
+                    for (int b = 0; b < freeSpaceBeforeWordLength; b++)
                     {
-                        window.Background = Brushes.Gray;
-                        window.FontSize = 24;
+                        windowsSpaceUniformGrid.Children.Add(CreateWindow(r * 20 + b + 1, lightGray));
+                    }
+                    for (int n = 0; n < splittedEntry[actualWord].Length; n++)
+                    {
+                        TextBlock window = CreateWindow(r * 20 + n + 1 + freeSpaceBeforeWordLength, darkGray);
                         window.TextAlignment = TextAlignment.Center;
+                        windowsSpaceUniformGrid.Children.Add(window);
                     }
-                    else window.Background = Brushes.LightGray;
-                }
-                else window.Background = Brushes.LightGray;
-                windowsSpaceUniformGrid.Children.Add(window);
-                if (modulo == 0)
-                {
-                    line++;
-                    if (line > firstLine && line <= lastLine)
+                    for (int a = 0; a < columns - freeSpaceBeforeWordLength - splittedEntry[actualWord].Length; a++)
                     {
-                        firstLine = line;
+                        windowsSpaceUniformGrid.Children.Add(
+                            CreateWindow(r * 20 + a + 1 + freeSpaceBeforeWordLength + splittedEntry[actualWord].Length, lightGray)
+                            );
                     }
-                    if (firstLine == line) actualWord++;
+                    if (actualWord == splittedEntry.Length - 1) finish = true;
                 }
+                else for (int c = 0; c < columns; c++) windowsSpaceUniformGrid.Children.Add(CreateWindow(r * 20 + c + 1, lightGray));
             }
         }
 
-        private int StartLine(int wordsLength)
+        private TextBlock CreateWindow(int index, string color)
         {
-            switch (wordsLength)
+            // Set window properties
+            TextBlock window = new TextBlock();
+            window.Margin = new Thickness(2);
+            window.Name = "window" + index;
+            window.Background = new BrushConverter().ConvertFrom(color) as Brush;
+            return window;
+        }
+
+        private int StartLine(int wordsAmount)
+        {
+            try
             {
-                case 1:
-                    return 3;
-                case 2:
-                case 3:
-                    return 2;
-                case 4:
-                case 5:
-                    return 1;
+                switch (wordsAmount)
+                {
+                    case 1:
+                        return 3;
+                    case 2:
+                    case 3:
+                        return 2;
+                    case 4:
+                    case 5:
+                        return 1;
+                }
+                throw new Exception();
             }
-            // make exception
-            throw new NotImplementedException();
+            catch (Exception)
+            {
+                MessageBox.Show("Couldn't determine start line!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return 1;
+            }
         }
 
         private void LoadData()
         {
-            // change it to relative and make exceptions
             try
             {
-                using (StreamReader file = new StreamReader(@"C:\Programs\szubienica\szubienica\data.json"))
+                using (StreamReader file = new StreamReader("../../../data.json"))
                 {
-                    // change 
                     string json = file.ReadToEnd();
                     List<Data> items = JsonConvert.DeserializeObject<List<Data>>(json);
                     Data drawedData = DrawEntry(items);
@@ -120,11 +147,18 @@ namespace szubienica
                     category = drawedData.category;
                 }
             }
-            catch (Exception)
+            catch (FileNotFoundException e)
             {
-                MessageBox.Show("Couldn't load file with entries!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Couldn't find and load file!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            // make second exception wrong data file format
+            catch (JsonReaderException)
+            {
+                MessageBox.Show("Couldn't parse json file!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (ArgumentNullException)
+            {
+                MessageBox.Show("File with data is empty!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private Data DrawEntry(List<Data> items)
@@ -143,7 +177,9 @@ namespace szubienica
                     windowsNames.Add("window" + (wordsStartIndex[i] + index));
                 }
             }
-            List<TextBlock> windowsToShow = windowsSpaceUniformGrid.Children.OfType<TextBlock>().ToList().Where(window => windowsNames.Contains(window.Name.ToString())).ToList();
+            List<TextBlock> windowsToShow = windowsSpaceUniformGrid.Children.OfType<TextBlock>().ToList().Where(
+                window => windowsNames.Contains(window.Name.ToString())).ToList(
+                );
             foreach (TextBlock window in windowsToShow)
             {
                 window.Text = letter.ToUpper();
@@ -180,7 +216,8 @@ namespace szubienica
         {
             foreach (TextBlock window in windowsSpaceUniformGrid.Children)
             {
-                if (window.Background == Brushes.Gray && window.Text == string.Empty) return;
+                if (window.Background.ToString() == (new BrushConverter().ConvertFrom(darkGray) as Brush).ToString() 
+                    && window.Text == string.Empty) return;
             }
             WonGame();
         }
@@ -188,12 +225,19 @@ namespace szubienica
         private void WonGame()
         {
             MessageBox.Show("You Won!");
+            points++;
+            pointsTextBlock.Text = "Points: " + points;
             RestartGame();
         }
 
         private void RestartGame()
         {
-            throw new NotImplementedException();
+            LoadData();
+            categoryTextBlock.Text = "Category: " + category;
+            windowsSpaceUniformGrid.Children.Clear();
+            CreateUniformGrid();
+            mistakes = 0;
+            gallowsImage.Source = new BitmapImage(new Uri(imageSource + mistakes + ".png", UriKind.Relative));
         }
 
         private void IsEntryContainsLetter(string letter)
