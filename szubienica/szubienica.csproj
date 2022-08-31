@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="data.json" />
+    <None Remove="images\image0.png" />
+    <None Remove="images\image1.png" />
+    <None Remove="images\image2.png" />
+    <None Remove="images\image3.png" />
+    <None Remove="images\image4.png" />
+    <None Remove="images\image5.png" />
+    <None Remove="images\image6.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="data.json" />
+    <Resource Include="images\image2.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="images\image0.png" />
+    <Resource Include="images\image1.png" />
+    <Resource Include="images\image3.png" />
+    <Resource Include="images\image4.png" />
+    <Resource Include="images\image5.png" />
+    <Resource Include="images\image6.png" />
+  </ItemGroup>
+
+</Project>

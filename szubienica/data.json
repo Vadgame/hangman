@@ -1,0 +1,10 @@
+[
+  {
+    "category": "Car",
+    "entry": [ "ford", "mustang" ]
+  },
+  {
+    "category": "Cat",
+    "entry": [ "long", "hair", "bengal" ]
+  }
+]
